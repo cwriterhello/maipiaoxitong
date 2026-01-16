@@ -21,6 +21,7 @@ import org.elasticsearch.client.Response;
 import org.elasticsearch.client.ResponseException;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.common.geo.GeoDistance;
+import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
@@ -34,6 +35,7 @@ import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.GeoDistanceSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.data.mapping.model.Property;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -109,7 +111,7 @@ public class BusinessEsHandle {
         request.addParameters(Collections.<String, String>emptyMap());
         Response performRequest = restClient.performRequest(request);
     }
-    
+
     /**
      * 检查索引是否存在
      *

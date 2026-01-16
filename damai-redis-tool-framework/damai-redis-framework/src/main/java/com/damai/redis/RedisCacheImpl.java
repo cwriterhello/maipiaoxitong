@@ -25,13 +25,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * @program: 极度真实还原大麦网高并发实战项目。 添加 阿星不是程序员 微信，添加时备注 大麦 来获取项目的完整资料 
+ * @program: 极度真实还原大麦网高并发实战项目。 添加 阿星不是程序员 微信，添加时备注 大麦 来获取项目的完整资料
  * @description: redis方法实现
  * @author: 阿星不是程序员
  **/
 @AllArgsConstructor
 public class RedisCacheImpl implements RedisCache {
-    
+
     private StringRedisTemplate redisTemplate;
 
     @Override
@@ -45,7 +45,7 @@ public class RedisCacheImpl implements RedisCache {
         }
         return getComplex(cachedValue, clazz);
     }
-    
+
     @Override
     public <T> T get(RedisKeyBuild redisKeyBuild, Class<T> clazz, Supplier<T> supplier, long ttl, TimeUnit timeUnit) {
         T t = get(redisKeyBuild, clazz);
@@ -54,7 +54,7 @@ public class RedisCacheImpl implements RedisCache {
             if (CacheUtil.isEmpty(t)) {
                 return null;
             }
-            set(redisKeyBuild,t,ttl,timeUnit);
+            set(redisKeyBuild, t, ttl, timeUnit);
         }
         return t;
     }
@@ -64,7 +64,9 @@ public class RedisCacheImpl implements RedisCache {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         return redisTemplate.opsForValue().get(key, start, end);
-    };
+    }
+
+    ;
 
     @Override
     public <T> List<T> getValueIsList(RedisKeyBuild redisKeyBuild, Class<T> clazz) {
@@ -76,7 +78,7 @@ public class RedisCacheImpl implements RedisCache {
         }
         return JSON.parseArray(valueStr, clazz);
     }
-    
+
     @Override
     public <T> List<T> getValueIsList(RedisKeyBuild redisKeyBuild, Class<T> clazz, Supplier<List<T>> supplier, long ttl, TimeUnit timeUnit) {
         CacheUtil.checkNotBlank(redisKeyBuild);
@@ -88,7 +90,7 @@ public class RedisCacheImpl implements RedisCache {
             if (CacheUtil.isEmpty(tList)) {
                 return null;
             }
-            set(redisKeyBuild,tList,ttl,timeUnit);
+            set(redisKeyBuild, tList, ttl, timeUnit);
         }
         return tList;
     }
@@ -99,7 +101,7 @@ public class RedisCacheImpl implements RedisCache {
         CacheUtil.checkNotEmpty(keyList);
         List<String> batchKey = CacheUtil.getBatchKey(keyList);
         List<String> list = redisTemplate.opsForValue().multiGet(batchKey);
-        
+
         return CacheUtil.optimizeRedisList(redisTemplate.opsForValue().multiGet(CacheUtil.optimizeRedisList(list)));
     }
 
@@ -116,12 +118,12 @@ public class RedisCacheImpl implements RedisCache {
         String key = redisKeyBuild.getRelKey();
         return redisTemplate.getExpire(key);
     }
-    
+
     @Override
-    public Long getExpire(RedisKeyBuild redisKeyBuild,TimeUnit timeUnit) {
+    public Long getExpire(RedisKeyBuild redisKeyBuild, TimeUnit timeUnit) {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
-        return redisTemplate.getExpire(key,timeUnit);
+        return redisTemplate.getExpire(key, timeUnit);
     }
 
     @Override
@@ -168,7 +170,7 @@ public class RedisCacheImpl implements RedisCache {
         String key = redisKeyBuild.getRelKey();
         return redisTemplate.type(key);
     }
-    
+
     @Override
     public void set(RedisKeyBuild redisKeyBuild, Object object) {
         CacheUtil.checkNotBlank(redisKeyBuild);
@@ -292,7 +294,7 @@ public class RedisCacheImpl implements RedisCache {
     }
 
     @Override
-    public Boolean putHashIfAbsent(RedisKeyBuild redisKeyBuild, String hashKey, Object value){
+    public Boolean putHashIfAbsent(RedisKeyBuild redisKeyBuild, String hashKey, Object value) {
         CacheUtil.checkNotBlank(redisKeyBuild);
         CacheUtil.checkNotBlank(hashKey);
         String key = redisKeyBuild.getRelKey();
@@ -318,13 +320,13 @@ public class RedisCacheImpl implements RedisCache {
         CacheUtil.checkNotBlank(redisKeyBuild);
         CacheUtil.checkNotBlank(hashKey);
         String key = redisKeyBuild.getRelKey();
-        Object o = redisTemplate.opsForHash().get(key,hashKey);
+        Object o = redisTemplate.opsForHash().get(key, hashKey);
         if (o == null) {
             return new ArrayList<>();
         }
         List<T> list = new ArrayList<>();
         if (o instanceof String) {
-            list = JSON.parseArray((String)o, clazz);
+            list = JSON.parseArray((String) o, clazz);
         }
         return list;
     }
@@ -336,8 +338,8 @@ public class RedisCacheImpl implements RedisCache {
         String key = redisKeyBuild.getRelKey();
         List<Object> objHashKeys = new ArrayList<>(hashKeys);
         List<Object> multiGetObj = redisTemplate.opsForHash().multiGet(key, objHashKeys);
-        
-        if (CacheUtil.checkRedisListIsEmpty(multiGetObj)){
+
+        if (CacheUtil.checkRedisListIsEmpty(multiGetObj)) {
             return new ArrayList<>();
         }
         if (String.class.isAssignableFrom(clazz)) {
@@ -352,7 +354,7 @@ public class RedisCacheImpl implements RedisCache {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         List<Object> valuesObj = redisTemplate.opsForHash().values(key);
-        if (CacheUtil.checkRedisListIsEmpty(valuesObj)){
+        if (CacheUtil.checkRedisListIsEmpty(valuesObj)) {
             return new ArrayList<>();
         }
         if (String.class.isAssignableFrom(clazz)) {
@@ -361,15 +363,15 @@ public class RedisCacheImpl implements RedisCache {
 
         return parseObjects(valuesObj, clazz);
     }
-    
+
     @Override
-    public <T> Map<String,T> getAllMapForHash(RedisKeyBuild redisKeyBuild, Class<T> clazz) {
+    public <T> Map<String, T> getAllMapForHash(RedisKeyBuild redisKeyBuild, Class<T> clazz) {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         Map<Object, Object> entries = redisTemplate.opsForHash().entries(key);
-        Map<String,T> map = new HashMap<>(64);
-        entries.forEach((k,v) -> {
-            map.put(String.valueOf(k),getComplex(v, clazz));
+        Map<String, T> map = new HashMap<>(64);
+        entries.forEach((k, v) -> {
+            map.put(String.valueOf(k), getComplex(v, clazz));
         });
         return map;
     }
@@ -398,7 +400,7 @@ public class RedisCacheImpl implements RedisCache {
     }
 
     @Override
-    public Long leftPushAllForList(RedisKeyBuild redisKeyBuild, List<?> valueList){
+    public Long leftPushAllForList(RedisKeyBuild redisKeyBuild, List<?> valueList) {
         CacheUtil.checkNotBlank(redisKeyBuild);
         CacheUtil.checkNotEmpty(valueList);
         String key = redisKeyBuild.getRelKey();
@@ -411,7 +413,7 @@ public class RedisCacheImpl implements RedisCache {
     }
 
     @Override
-    public Long leftPushIfPresentForList(RedisKeyBuild redisKeyBuild, Object value){
+    public Long leftPushIfPresentForList(RedisKeyBuild redisKeyBuild, Object value) {
         CacheUtil.checkNotBlank(redisKeyBuild);
         CacheUtil.checkNotEmpty(value);
         String key = redisKeyBuild.getRelKey();
@@ -420,7 +422,7 @@ public class RedisCacheImpl implements RedisCache {
     }
 
     @Override
-    public Long leftPushForList(RedisKeyBuild redisKeyBuild, Object pivot, Object value){
+    public Long leftPushForList(RedisKeyBuild redisKeyBuild, Object pivot, Object value) {
         CacheUtil.checkNotBlank(redisKeyBuild);
         CacheUtil.checkNotEmpty(pivot);
         CacheUtil.checkNotEmpty(value);
@@ -440,7 +442,7 @@ public class RedisCacheImpl implements RedisCache {
     }
 
     @Override
-    public Long rightPushAllForList(RedisKeyBuild redisKeyBuild, List<Object> valueList){
+    public Long rightPushAllForList(RedisKeyBuild redisKeyBuild, List<Object> valueList) {
         CacheUtil.checkNotBlank(redisKeyBuild);
         CacheUtil.checkNotEmpty(valueList);
         String key = redisKeyBuild.getRelKey();
@@ -453,7 +455,7 @@ public class RedisCacheImpl implements RedisCache {
     }
 
     @Override
-    public Long rightPushIfPresentForList(RedisKeyBuild redisKeyBuild, Object value){
+    public Long rightPushIfPresentForList(RedisKeyBuild redisKeyBuild, Object value) {
         CacheUtil.checkNotBlank(redisKeyBuild);
         CacheUtil.checkNotEmpty(value);
         String key = redisKeyBuild.getRelKey();
@@ -462,7 +464,7 @@ public class RedisCacheImpl implements RedisCache {
     }
 
     @Override
-    public Long rightPushForList(RedisKeyBuild redisKeyBuild, Object pivot, Object value){
+    public Long rightPushForList(RedisKeyBuild redisKeyBuild, Object pivot, Object value) {
         CacheUtil.checkNotBlank(redisKeyBuild);
         CacheUtil.checkNotEmpty(pivot);
         CacheUtil.checkNotEmpty(value);
@@ -538,18 +540,18 @@ public class RedisCacheImpl implements RedisCache {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         List list = redisTemplate.opsForList().range(key, 0, -1);
-        if (CacheUtil.checkRedisListIsEmpty(list)){
+        if (CacheUtil.checkRedisListIsEmpty(list)) {
             return new ArrayList<>();
         }
         return parseObjects(list, clazz);
     }
 
     @Override
-    public <T> List<T> rangeForList(RedisKeyBuild redisKeyBuild, long start, long end, Class<T> clazz){
+    public <T> List<T> rangeForList(RedisKeyBuild redisKeyBuild, long start, long end, Class<T> clazz) {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         List range = redisTemplate.opsForList().range(key, start, end);
-        if (CacheUtil.checkRedisListIsEmpty(range)){
+        if (CacheUtil.checkRedisListIsEmpty(range)) {
             return new ArrayList<>();
         }
         return parseObjects(range, clazz);
@@ -591,7 +593,7 @@ public class RedisCacheImpl implements RedisCache {
         String key = redisKeyBuild.getRelKey();
         redisTemplate.delete(key);
     }
-    
+
 
     @Override
     public Long delForHash(RedisKeyBuild redisKeyBuild, String hashKey) {
@@ -618,7 +620,7 @@ public class RedisCacheImpl implements RedisCache {
     }
 
     @Override
-    public Double incrByDoubleForHash(RedisKeyBuild redisKeyBuild, String hashKey, double delta){
+    public Double incrByDoubleForHash(RedisKeyBuild redisKeyBuild, String hashKey, double delta) {
         CacheUtil.checkNotBlank(redisKeyBuild);
         CacheUtil.checkNotBlank(hashKey);
         String key = redisKeyBuild.getRelKey();
@@ -630,11 +632,11 @@ public class RedisCacheImpl implements RedisCache {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         Set<Object> keys = redisTemplate.opsForHash().keys(key);
-        return parseObjects(keys,String.class);
+        return parseObjects(keys, String.class);
     }
 
     @Override
-    public Long sizeForHash(RedisKeyBuild redisKeyBuild){
+    public Long sizeForHash(RedisKeyBuild redisKeyBuild) {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         return redisTemplate.opsForHash().size(key);
@@ -700,7 +702,7 @@ public class RedisCacheImpl implements RedisCache {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         String cachedValue = redisTemplate.opsForSet().pop(key);
-        return getComplex(cachedValue,clazz);
+        return getComplex(cachedValue, clazz);
     }
 
     @Override
@@ -737,7 +739,7 @@ public class RedisCacheImpl implements RedisCache {
         String key = redisKeyBuild.getRelKey();
         String otherKey = otherRedisKeyBuild.getRelKey();
         Set set = redisTemplate.opsForSet().intersect(key, otherKey);
-        return parseObjects(set,clazz);
+        return parseObjects(set, clazz);
     }
 
     @Override
@@ -747,7 +749,7 @@ public class RedisCacheImpl implements RedisCache {
         String key = redisKeyBuild.getRelKey();
         List<String> otherKeys = CacheUtil.getBatchKey(otherRedisKeyBuilds);
         Set set = redisTemplate.opsForSet().intersect(key, otherKeys);
-        return parseObjects(set,clazz);
+        return parseObjects(set, clazz);
     }
 
     @Override
@@ -779,7 +781,7 @@ public class RedisCacheImpl implements RedisCache {
         String key = redisKeyBuild.getRelKey();
         String otherKey = otherRedisKeyBuild.getRelKey();
         Set set = redisTemplate.opsForSet().union(key, otherKey);
-        return parseObjects(set,clazz);
+        return parseObjects(set, clazz);
     }
 
     @Override
@@ -789,7 +791,7 @@ public class RedisCacheImpl implements RedisCache {
         String key = redisKeyBuild.getRelKey();
         List<String> otherKeys = CacheUtil.getBatchKey(otherRedisKeyBuilds);
         Set set = redisTemplate.opsForSet().union(key, otherKeys);
-        return parseObjects(set,clazz);
+        return parseObjects(set, clazz);
     }
 
     @Override
@@ -821,7 +823,7 @@ public class RedisCacheImpl implements RedisCache {
         String key = redisKeyBuild.getRelKey();
         String otherKey = otherRedisKeyBuild.getRelKey();
         Set set = redisTemplate.opsForSet().difference(key, otherKey);
-        return parseObjects(set,clazz);
+        return parseObjects(set, clazz);
     }
 
     @Override
@@ -831,7 +833,7 @@ public class RedisCacheImpl implements RedisCache {
         String key = redisKeyBuild.getRelKey();
         List<String> otherKeys = CacheUtil.getBatchKey(otherRedisKeyBuilds);
         Set set = redisTemplate.opsForSet().difference(key, otherKeys);
-        return parseObjects(set,clazz);
+        return parseObjects(set, clazz);
     }
 
     @Override
@@ -861,7 +863,7 @@ public class RedisCacheImpl implements RedisCache {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         Set members = redisTemplate.opsForSet().members(key);
-        return parseObjects(members,clazz);
+        return parseObjects(members, clazz);
     }
 
     @Override
@@ -877,10 +879,10 @@ public class RedisCacheImpl implements RedisCache {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         List list = redisTemplate.opsForSet().randomMembers(key, count);
-        if (CacheUtil.checkRedisListIsEmpty(list)){
+        if (CacheUtil.checkRedisListIsEmpty(list)) {
             return new ArrayList<>();
         }
-        return parseObjects(list,clazz);
+        return parseObjects(list, clazz);
     }
 
     @Override
@@ -888,7 +890,7 @@ public class RedisCacheImpl implements RedisCache {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         Set set = redisTemplate.opsForSet().distinctRandomMembers(key, count);
-        return parseObjects(set,clazz);
+        return parseObjects(set, clazz);
     }
 
     @Override
@@ -900,23 +902,23 @@ public class RedisCacheImpl implements RedisCache {
     }
 
     @Override
-    public void addForSortedSet(RedisKeyBuild redisKeyBuild, Object value, Double score){
+    public void addForSortedSet(RedisKeyBuild redisKeyBuild, Object value, Double score) {
         CacheUtil.checkNotBlank(redisKeyBuild);
         CacheUtil.checkNotEmpty(value);
         CacheUtil.checkNotEmpty(score);
         String key = redisKeyBuild.getRelKey();
         String jsonValue = value instanceof String ? (String) value : JSON.toJSONString(value);
-        redisTemplate.opsForZSet().add(key,jsonValue,score);
+        redisTemplate.opsForZSet().add(key, jsonValue, score);
     }
 
     @Override
-    public void addForSortedSet(RedisKeyBuild redisKeyBuild, Object value, Double score, long ttl){
-        addForSortedSet(redisKeyBuild,value,score,ttl, CacheUtil.DEFAULT_TIME_UNIT);
+    public void addForSortedSet(RedisKeyBuild redisKeyBuild, Object value, Double score, long ttl) {
+        addForSortedSet(redisKeyBuild, value, score, ttl, CacheUtil.DEFAULT_TIME_UNIT);
     }
 
     @Override
-    public void addForSortedSet(RedisKeyBuild redisKeyBuild, Object value, Double score, long ttl, TimeUnit timeUnit){
-        addForSortedSet(redisKeyBuild,value,score);
+    public void addForSortedSet(RedisKeyBuild redisKeyBuild, Object value, Double score, long ttl, TimeUnit timeUnit) {
+        addForSortedSet(redisKeyBuild, value, score);
         expire(redisKeyBuild, ttl, timeUnit);
     }
 
@@ -952,7 +954,7 @@ public class RedisCacheImpl implements RedisCache {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         Set resultSet = redisTemplate.opsForZSet().range(key, start, end);
-        return parseObjects(resultSet,clazz);
+        return parseObjects(resultSet, clazz);
     }
 
     @Override
@@ -960,7 +962,7 @@ public class RedisCacheImpl implements RedisCache {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         Set resultSet = redisTemplate.opsForZSet().reverseRange(key, start, end);
-        return parseObjects(resultSet,clazz);
+        return parseObjects(resultSet, clazz);
     }
 
     @Override
@@ -980,7 +982,7 @@ public class RedisCacheImpl implements RedisCache {
                 .map(value -> value instanceof String ? (String) value : JSON.toJSONString(value))
                 .distinct()
                 .collect(Collectors.toList());
-        return redisTemplate.opsForZSet().remove(key,jsonValueList.toArray());
+        return redisTemplate.opsForZSet().remove(key, jsonValueList.toArray());
     }
 
     @Override
@@ -1040,7 +1042,7 @@ public class RedisCacheImpl implements RedisCache {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         Set set = redisTemplate.opsForZSet().rangeByScore(key, min, max);
-        return parseObjects(set,clazz);
+        return parseObjects(set, clazz);
     }
 
     @Override
@@ -1073,7 +1075,7 @@ public class RedisCacheImpl implements RedisCache {
         CacheUtil.checkNotBlank(redisKeyBuild);
         String key = redisKeyBuild.getRelKey();
         Set set = redisTemplate.opsForZSet().reverseRangeByScore(key, min, max);
-        return parseObjects(set,clazz);
+        return parseObjects(set, clazz);
     }
 
     @Override
@@ -1181,13 +1183,13 @@ public class RedisCacheImpl implements RedisCache {
     }
 
     @Override
-    public <T> T getByType(RedisKeyBuild redisKeyBuild, Type genericReturnType){
+    public <T> T getByType(RedisKeyBuild redisKeyBuild, Type genericReturnType) {
         String key = redisKeyBuild.getRelKey();
         String s = redisTemplate.boundValueOps(key).get();
         if (StringUtil.isEmpty(s)) {
             return null;
         }
-        return JSONObject.parseObject(s ,genericReturnType);
+        return JSONObject.parseObject(s, genericReturnType);
     }
 
     @Override
@@ -1202,9 +1204,9 @@ public class RedisCacheImpl implements RedisCache {
         }
         if (clazz.isAssignableFrom(String.class)) {
             if (source instanceof String) {
-                return (T)source;
-            }else{
-                return (T)JSON.toJSONString(source);
+                return (T) source;
+            } else {
+                return (T) JSON.toJSONString(source);
             }
         }
         return source instanceof String ? JSON.parseObject((String) source, CacheUtil.buildType(clazz)) : null;
@@ -1242,7 +1244,7 @@ public class RedisCacheImpl implements RedisCache {
         return resultSet;
     }
 
-    public <T> Set<ZSetOperations.TypedTuple<T>> typedTupleStringParseObjects(Set<ZSetOperations.TypedTuple<String>> sources, Class<T> clazz){
+    public <T> Set<ZSetOperations.TypedTuple<T>> typedTupleStringParseObjects(Set<ZSetOperations.TypedTuple<String>> sources, Class<T> clazz) {
         if (sources == null) {
             return new HashSet<>();
         }
@@ -1251,13 +1253,13 @@ public class RedisCacheImpl implements RedisCache {
             String value = typedTuple.getValue();
             T complex = getComplex(value, clazz);
             Double score = typedTuple.getScore();
-            DefaultTypedTuple defaultTypedTuple = new DefaultTypedTuple(complex,score);
+            DefaultTypedTuple defaultTypedTuple = new DefaultTypedTuple(complex, score);
             set.add(defaultTypedTuple);
         }
         return set;
     }
 
-    public <T> Set<ZSetOperations.TypedTuple<T>> typedTupleParseObjects(Set<ZSetOperations.TypedTuple> sources, Class<T> clazz){
+    public <T> Set<ZSetOperations.TypedTuple<T>> typedTupleParseObjects(Set<ZSetOperations.TypedTuple> sources, Class<T> clazz) {
         if (sources == null) {
             return new HashSet<>();
         }
@@ -1266,7 +1268,7 @@ public class RedisCacheImpl implements RedisCache {
             Object value = typedTuple.getValue();
             T complex = getComplex(value, clazz);
             Double score = typedTuple.getScore();
-            DefaultTypedTuple defaultTypedTuple = new DefaultTypedTuple(complex,score);
+            DefaultTypedTuple defaultTypedTuple = new DefaultTypedTuple(complex, score);
             set.add(defaultTypedTuple);
         }
         return set;

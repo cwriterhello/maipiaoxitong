@@ -11,9 +11,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -44,6 +42,8 @@ public class ProgramSeatCacheData {
     }
     
     public List<SeatVo> getData(List<String> keys, String[] args){
+
+
         List<SeatVo> list;
         Object object = redisCache.getInstance().execute(redisScript, keys, args);
         List<String> seatVoStrlist = new ArrayList<>();

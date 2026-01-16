@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import org.redisson.api.RLock;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @program: 极度真实还原大麦网高并发实战项目。 添加 阿星不是程序员 微信，添加时备注 大麦 来获取项目的完整资料 
@@ -24,7 +25,6 @@ public class ServiceLockTool {
     private final LockInfoHandleFactory lockInfoHandleFactory;
     
     private final ServiceLockFactory serviceLockFactory;
-    
     /**
      * 没有返回值的加锁执行
      * @param taskRun 要执行的任务

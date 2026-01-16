@@ -14,7 +14,6 @@ import lombok.AllArgsConstructor;
 public class ServiceLockFactory {
     
     private final ManageLocker manageLocker;
-    
 
     public ServiceLocker getLock(LockType lockType){
         ServiceLocker lock;

@@ -366,7 +366,7 @@ public class ProgramService extends ServiceImpl<ProgramMapper, Program> {
      * */
     public PageVo<ProgramListVo> dbSelectPage(ProgramPageListDto programPageListDto) {
         IPage<ProgramJoinShowTime> iPage = 
-                programMapper.selectPage(PageUtil.getPageParams(programPageListDto), programPageListDto);
+                programMapper.selectPage(PageUtil.getPage(programPageListDto), programPageListDto);
         if (CollectionUtil.isEmpty(iPage.getRecords())) {
             return new PageVo<>(iPage.getCurrent(), iPage.getSize(), iPage.getTotal(), new ArrayList<>());
         }
@@ -389,12 +389,12 @@ public class ProgramService extends ServiceImpl<ProgramMapper, Program> {
         }else {
             log.error("base-data selectByIdList rpc error areaResponse:{}", JSON.toJSONString(areaResponse));
         }
+
         Map<Long,String> areaMap = tempAreaMap;
-        
         return PageUtil.convertPage(iPage, programJoinShowTime -> {
             ProgramListVo programListVo = new ProgramListVo();
             BeanUtil.copyProperties(programJoinShowTime, programListVo);
-            
+
             programListVo.setAreaName(areaMap.get(programJoinShowTime.getAreaId()));
             programListVo.setProgramCategoryName(programCategoryMap.get(programJoinShowTime.getProgramCategoryId()));
             programListVo.setMinPrice(Optional.ofNullable(ticketCategorieMap.get(programJoinShowTime.getId()))
@@ -441,20 +441,27 @@ public class ProgramService extends ServiceImpl<ProgramMapper, Program> {
      * @return 执行后的结果
      * */
     public ProgramVo getDetail(ProgramGetDto programGetDto) {
+        //查询节目演出时间
         ProgramShowTime programShowTime = programShowTimeService.selectProgramShowTimeByProgramId(programGetDto.getId());
+
+        //从节目表获取数据，以及区域信息
         ProgramVo programVo = programService.getById(programGetDto.getId(),DateUtils.countBetweenSecond(DateUtils.now(),
                 programShowTime.getShowTime()), TimeUnit.SECONDS);
         programVo.setShowTime(programShowTime.getShowTime());
         programVo.setShowDayTime(programShowTime.getShowDayTime());
         programVo.setShowWeekTime(programShowTime.getShowWeekTime());
-        
+
+        //从节目分组表获取数据
         ProgramGroupVo programGroupVo = programService.getProgramGroup(programVo.getProgramGroupId());
         programVo.setProgramGroupVo(programGroupVo);
-        
+
+        //预先加载用户购票人
         preloadTicketUserList(programVo.getHighHeat());
-        
+
+        //预先加载用户下节目订单数量
         preloadAccountOrderCount(programVo.getId());
-        
+
+        //设置节目类型相关信息
         ProgramCategory programCategory = getProgramCategory(programVo.getProgramCategoryId());
         if (Objects.nonNull(programCategory)) {
             programVo.setProgramCategoryName(programCategory.getName());
@@ -463,12 +470,13 @@ public class ProgramService extends ServiceImpl<ProgramMapper, Program> {
         if (Objects.nonNull(parentProgramCategory)) {
             programVo.setParentProgramCategoryName(parentProgramCategory.getName());
         }
-        
+
+        //查询节目票档
         List<TicketCategoryVo> ticketCategoryVoList =
                 ticketCategoryService.selectTicketCategoryListByProgramId(programVo.getId(),
                         DateUtils.countBetweenSecond(DateUtils.now(),programShowTime.getShowTime()), TimeUnit.SECONDS);
         programVo.setTicketCategoryVoList(ticketCategoryVoList);
-        
+
         return programVo;
     }
     
@@ -581,6 +589,7 @@ public class ProgramService extends ServiceImpl<ProgramMapper, Program> {
                 RedisKeyBuild.createRedisKey(RedisKeyManage.PROGRAM_GROUP, programGroupId).getRelKey(),
                 key -> getProgramGroup(programGroupId));
     }
+
     @ServiceLock(lockType= LockType.Read,name = PROGRAM_GROUP_LOCK,keys = {"#programGroupId"})
     public ProgramGroupVo getProgramGroup(Long programGroupId) {
         ProgramGroupVo programGroupVo =
@@ -830,7 +839,7 @@ public class ProgramService extends ServiceImpl<ProgramMapper, Program> {
                 }
             }
         }
-        delRedisData(programId);
+         delRedisData(programId);
         delLocalCache(programId);
         return true;
     }

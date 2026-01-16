@@ -20,7 +20,7 @@ public class BaseParameterHolder {
             map = new HashMap<>(64);
         }
         map.put(name, value);
-        THREAD_LOCAL_MAP.set(map);
+
     }
     
     public static String getParameter(String name) {

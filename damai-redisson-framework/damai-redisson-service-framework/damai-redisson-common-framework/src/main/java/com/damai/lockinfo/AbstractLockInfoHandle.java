@@ -63,7 +63,15 @@ public abstract class AbstractLockInfoHandle implements LockInfoHandle {
         List<String> definitionKeys = getSpElKey(keys, method, joinPoint.getArgs());
         return SEPARATOR + String.join(SEPARATOR, definitionKeys);
     }
-    
+
+    /**
+     * 这段代码的执行流程是：
+     * 先获取MethodSignature中的method
+     * 检查这个方法是否来自接口
+     * 如果是接口方法，则尝试获取目标类中对应的实现方法
+     * 如果获取失败，仍然使用原来的接口方法
+     * 这种方式确保了在各种情况下都能获取到合适的方法对象，同时避免了不必要的性能开销和异常处理。
+     * */
     private Method getMethod(JoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
@@ -78,15 +86,25 @@ public abstract class AbstractLockInfoHandle implements LockInfoHandle {
         return method;
     }
 
+    /**
+     * 获取自定义键
+     * @param definitionKeys 参数名
+     * @param method 方法
+     * @param parameterValues 参数值
+     * @return 切点的方法
+     * */
     private List<String> getSpElKey(String[] definitionKeys, Method method, Object[] parameterValues) {
         List<String> definitionKeyList = new ArrayList<>();
         for (String definitionKey : definitionKeys) {
             if (!ObjectUtils.isEmpty(definitionKey)) {
+                //spEl的构建
                 EvaluationContext context = new MethodBasedEvaluationContext(null, method, parameterValues, nameDiscoverer);
+                //解析参数名来替换成真正的参数值
                 Object objKey = parser.parseExpression(definitionKey).getValue(context);
                 definitionKeyList.add(ObjectUtils.nullSafeToString(objKey));
             }
         }
+        //将解析出的参数值拼装一起后返回
         return definitionKeyList;
     }
 

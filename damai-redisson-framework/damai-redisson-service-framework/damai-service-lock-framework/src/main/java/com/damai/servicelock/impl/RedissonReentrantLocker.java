@@ -16,12 +16,12 @@ import java.util.concurrent.TimeUnit;
 public class RedissonReentrantLocker implements ServiceLocker {
 
     private final RedissonClient redissonClient;
-    
+
     @Override
     public RLock getLock(String lockKey) {
         return redissonClient.getLock(lockKey);
     }
-    
+
     @Override
     public RLock lock(String lockKey) {
         RLock lock = redissonClient.getLock(lockKey);
@@ -52,7 +52,7 @@ public class RedissonReentrantLocker implements ServiceLocker {
             return false;
         }
     }
-    
+
     @Override
     public boolean tryLock(String lockKey, TimeUnit unit, long waitTime, long leaseTime) {
         RLock lock = redissonClient.getLock(lockKey);

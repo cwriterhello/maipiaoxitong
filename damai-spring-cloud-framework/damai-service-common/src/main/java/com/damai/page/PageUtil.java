@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
  **/
 public class PageUtil {
     
-    public static <T> IPage<T> getPageParams(BasePageDto basePageDto) {
-        return getPageParams(basePageDto.getPageNumber(), basePageDto.getPageSize());
+    public static <T> IPage<T> getPage(BasePageDto basePageDto) {
+        return getPage(basePageDto.getPageNumber(), basePageDto.getPageSize());
     }
     
-    public static <T> IPage<T> getPageParams(int pageNumber, int pageSize) {
+    public static <T> IPage<T> getPage(int pageNumber, int pageSize) {
         return new Page<>(pageNumber, pageSize);
     }
     

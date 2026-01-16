@@ -1,6 +1,7 @@
 package com.damai.servicelock.aspect;
 
 import com.damai.constant.LockInfoType;
+import com.damai.servicelock.impl.RedissonReentrantLocker;
 import com.damai.util.StringUtil;
 import com.damai.lockinfo.LockInfoHandle;
 import com.damai.lockinfo.factory.LockInfoHandleFactory;
@@ -20,6 +21,7 @@ import org.springframework.core.annotation.Order;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @program: 极度真实还原大麦网高并发实战项目。 添加 阿星不是程序员 微信，添加时备注 大麦 来获取项目的完整资料 
@@ -35,31 +37,41 @@ public class ServiceLockAspect {
     private final LockInfoHandleFactory lockInfoHandleFactory;
     
     private final ServiceLockFactory serviceLockFactory;
-    
+
 
     @Around("@annotation(servicelock)")
     public Object around(ProceedingJoinPoint joinPoint, ServiceLock servicelock) throws Throwable {
+        //获取锁的名字解析处理器
         LockInfoHandle lockInfoHandle = lockInfoHandleFactory.getLockInfoHandle(LockInfoType.SERVICE_LOCK);
+        //拼接锁的名字 LOCK:${name}:${key}
         String lockName = lockInfoHandle.getLockName(joinPoint, servicelock.name(),servicelock.keys());
+        //锁的类型，默认 可重入锁
         LockType lockType = servicelock.lockType();
+        //尝试加锁失败最多等待时间，默认10s
         long waitTime = servicelock.waitTime();
+        //时间单位，默认秒
         TimeUnit timeUnit = servicelock.timeUnit();
-
+        //获得具体的锁类型
         ServiceLocker lock = serviceLockFactory.getLock(lockType);
+        //进行加锁
         boolean result = lock.tryLock(lockName, timeUnit, waitTime);
-
+        //如果加锁成功
         if (result) {
             try {
+                //执行业务逻辑
                 return joinPoint.proceed();
             }finally{
+                //解锁
                 lock.unlock(lockName);
             }
         }else {
             log.warn("Timeout while acquiring serviceLock:{}",lockName);
+            //加锁失败,如果设置了自定义处理，则执行
             String customLockTimeoutStrategy = servicelock.customLockTimeoutStrategy();
             if (StringUtil.isNotEmpty(customLockTimeoutStrategy)) {
                 return handleCustomLockTimeoutStrategy(customLockTimeoutStrategy, joinPoint);
             }else{
+                //默认处理
                 servicelock.lockTimeoutStrategy().handler(lockName);
             }
             return joinPoint.proceed();
