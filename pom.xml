@@ -98,6 +98,18 @@
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
+<!--			&lt;!&ndash; 👇 新增：添加 MyBatis-Plus 依赖管理 👇 &ndash;&gt;-->
+<!--			<dependency>-->
+<!--				<groupId>com.baomidou</groupId>-->
+<!--				<artifactId>mybatis-plus-boot-starter</artifactId>-->
+<!--				<version>${mybatis-plus.version}</version>-->
+<!--			</dependency>-->
+<!--			<dependency>-->
+<!--				<groupId>com.baomidou</groupId>-->
+<!--				<artifactId>mybatis-plus-generator</artifactId>-->
+<!--				<version>${mybatis-plus-generator.version}</version>-->
+<!--			</dependency>-->
+<!--			&lt;!&ndash; 👆 新增结束 👆 &ndash;&gt;-->
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>

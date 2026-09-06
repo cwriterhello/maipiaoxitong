@@ -18,15 +18,13 @@ spring:
   data:
     redis:
       database: 0
-      host: 192.168.74.128
+      host: localhost
       port: 6379
       timeout: 3000
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.74.128:8848
-        username: nacos
-        password: nacos
+        server-addr: localhost:8848
         metadata:
           # true表示灰度服务/false表示生产服务(默认)
           gray: false
@@ -34,7 +32,7 @@ spring:
       eager: true
       transport:
         port: 8768
-        dashboard: 192.168.74.128:8082
+        dashboard: localhost:8082
 #      datasource:
 #        degrade:
 #          nacos:
@@ -54,7 +52,7 @@ spring:
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
   kafka:
-    bootstrap-servers: 192.168.74.128:9092
+    bootstrap-servers: localhost:9092
     producer:
       retries: 1
       key-serializer: org.apache.kafka.common.serialization.StringSerializer

@@ -9,6 +9,7 @@ public enum BaseCode {
     /**
      * 基础code码
      * */
+    SERVICE_LOCK_FAIL(1000,"只为启动项目临时加的"),
     SUCCESS(0, "OK"),
     
     SYSTEM_ERROR(-1,"系统异常，请稍后重试"),
